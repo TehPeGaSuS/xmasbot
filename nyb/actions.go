@@ -163,7 +163,7 @@ func (bot *Settings) addTriggers() {
 		},
 	})
 
-	//Trigger for new year in location
+	//Trigger for merry christmas in location
 	irc.AddTrigger(kitty.Trigger{
 		Condition: func(b *kitty.Bot, m *kitty.Message) bool {
 			return m.Command == "PRIVMSG" &&
