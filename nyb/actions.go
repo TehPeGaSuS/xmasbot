@@ -32,7 +32,7 @@ func (bot *Settings) addTriggers() {
 				strings.HasPrefix(normalize(m.Content), bot.Prefix+"source")
 		},
 		Action: func(b *kitty.Bot, m *kitty.Message) {
-			b.Reply(m, "https://github.com/TehPeGaSuS/xmasbot")
+			b.Reply(m, "Source code: https://github.com/TehPeGaSuS/xmasbot")
 		},
 	})
 
