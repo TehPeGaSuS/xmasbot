@@ -171,7 +171,7 @@ func (bot *Settings) addTriggers() {
 		},
 		Action: func(b *kitty.Bot, m *kitty.Message) {
 			arg := normalize(m.Content)[len(bot.Prefix)+len("xmas")+1:]
-			msg, err := bot.newYearInTZ(arg)
+			msg, err := bot.newChristmasInTZ(arg)
 			if err == nil {
 				b.Reply(m, msg)
 				return
@@ -181,7 +181,7 @@ func (bot *Settings) addTriggers() {
 				b.Reply(m, err.Error())
 				return
 			}
-			result, err := bot.newYear(arg)
+			result, err := bot.newChristmas(arg)
 			if err == errNoZone || err == errNoPlace {
 				b.Warn("Query error: " + err.Error())
 				b.Reply(m, err.Error())
@@ -231,7 +231,7 @@ func (bot *Settings) time(location string) (string, error) {
 	return msg, nil
 }
 
-func (bot *Settings) newYear(location string) (string, error) {
+func (bot *Settings) newChristmas(location string) (string, error) {
 	bot.irc.Info("Querying location: " + location)
 	res, err := NominatimFetcher(bot.Email, bot.Nominatim, location)
 	if err != nil {
@@ -257,15 +257,15 @@ func (bot *Settings) newYear(location string) (string, error) {
 	address := res[0].DisplayName
 	if now().UTC().Add(offset).Before(bot.target) {
 		hdur := humanDur(bot.target.Sub(now().UTC().Add(offset)))
-		const newYearFutureMsg = "Merry Christmas in %s will happen in %s"
-		return fmt.Sprintf(newYearFutureMsg, address, hdur), nil
+		const newChristmasFutureMsg = "Merry Christmas in %s will happen in %s"
+		return fmt.Sprintf(newChristmasFutureMsg, address, hdur), nil
 	}
 	hdur := humanDur(now().UTC().Add(offset).Sub(bot.target))
-	const newYearPastMsg = "Merry Christmas in %s happened %s ago"
-	return fmt.Sprintf(newYearPastMsg, address, hdur), nil
+	const newChristmasPastMsg = "Merry Christmas in %s happened %s ago"
+	return fmt.Sprintf(newChristmasPastMsg, address, hdur), nil
 }
 
-func (bot *Settings) newYearInTZ(tzAbbr string) (msg string, err error) {
+func (bot *Settings) newChristmasInTZ(tzAbbr string) (msg string, err error) {
 	tzAbbr = strings.ToUpper(tzAbbr)
 	var offset int
 	var ok bool
@@ -280,13 +280,13 @@ func (bot *Settings) newYearInTZ(tzAbbr string) (msg string, err error) {
 	t := now()
 	if t.UTC().Add(offsetdur).Before(bot.target) {
 		hdur := humanDur(bot.target.Sub(t.UTC().Add(offsetdur)))
-		const newYearFutureMsg = "Merry Christmas in %s will happen in %s"
-		return fmt.Sprintf(newYearFutureMsg, tzAbbr, hdur), nil
+		const newChristmasFutureMsg = "Merry Christmas in %s will happen in %s"
+		return fmt.Sprintf(newChristmasFutureMsg, tzAbbr, hdur), nil
 	}
 
 	hdur := humanDur(t.UTC().Add(offsetdur).Sub(bot.target))
-	const newYearPastMsg = "Merry Christmas in %s happened %s ago"
-	return fmt.Sprintf(newYearPastMsg, tzAbbr, hdur), nil
+	const newChristmasPastMsg = "Merry Christmas in %s happened %s ago"
+	return fmt.Sprintf(newChristmasPastMsg, tzAbbr, hdur), nil
 }
 
 func timeInTZ(tzAbbr string) (msg string, err error) {
