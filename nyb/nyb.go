@@ -140,12 +140,12 @@ func (bot *Settings) loopTimeZones() {
 			irc.Info(fmt.Sprintf("Zone pending: %.2f", zones[i].Offset))
 			hdur := humanDur(bot.target.Sub(now().UTC().Add(dur)))
 			hdur = bot.col(hdur)
-			next := bot.col("Next New Year") + " in "
-			if i == 0 && !(now().Month() == time.January && now().Day() < 2) {
-				next = bot.col("First New Year") + " in "
+			next := bot.col("Next Merry Christmas") + " in "
+			if i == 0 && !(now().Month() == time.December && now().Day() < 26) {
+				next = bot.col("First Merry Christmas") + " in "
 			}
 			if i == len(zones)-1 {
-				next = bot.col("Final New Year") + " in "
+				next = bot.col("Final Merry Christmas") + " in "
 			}
 			help := fmt.Sprintf(helpMsg, bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix, bot.Prefix)
 			for _, ch := range irc.Channels {
