@@ -1,6 +1,6 @@
 deps/
-newyearsbot
-newyearsbot.exe
+xmasbot
+xmasbot.exe
 *.zip
 my.yaml
 build.sh
