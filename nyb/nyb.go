@@ -180,7 +180,7 @@ func (bot *Settings) loopTimeZones() {
 // https://modern.ircdocs.horse/formatting.html
 func (bot *Settings) col(s string) string {
 	if bot.Colors {
-		s = "\x02\x0302" + s + "\x0f"
+		s = "\x02\x0303" + s + "\x0f"
 	}
 	return s
 }
