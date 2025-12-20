@@ -16,7 +16,7 @@ func main() {
 		//"irc.libera.chat:6697",
 		"happyhappy2025v2",
 		func(b *kitty.Bot) {
-			b.Channels = []string{"##ugjka2"}
+			b.Channels = []string{"##xmas00"}
 			b.SSL = true
 		},
 	)
