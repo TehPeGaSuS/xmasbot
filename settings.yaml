@@ -1,4 +1,4 @@
-# use of $./newyearsbot -yaml "settings.yaml"
+# use of $./xmasbot -yaml "settings.yaml"
 # irc server 1
 - nick: "xmas88" # mandatory field
   channels: ["#chan34564:channelkey"]  # channel with channel password after the ":"
