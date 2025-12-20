@@ -6,7 +6,7 @@ replace github.com/TehPeGaSuS/xmasbot => ../../
 
 require (
 	github.com/ugjka/go-tz/v2 v2.2.6
-	github.com/TehPeGaSuS/xmasbot
+	github.com/TehPeGaSuS/xmasbot v0.0.0-20240220183636-60f85109bc95
 )
 
 require (
