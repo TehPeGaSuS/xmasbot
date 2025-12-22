@@ -3,7 +3,7 @@ module tzbuilder
 go 1.24.0
 
 require (
-	github.com/TehPeGaSuS/xmasbot v0.0.0-20251222162138-7de1206c89f6
+	github.com/TehPeGaSuS/xmasbot v0.0.0-20251222215723-2cf345b3af57
 	github.com/ugjka/go-tz/v2 v2.2.6
 )
 
