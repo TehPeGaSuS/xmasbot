@@ -1,12 +1,12 @@
 module validatetz
 
-go 1.18
+go 1.24.0
 
 replace github.com/TehPeGaSuS/xmasbot => ../../
 
 require (
+	github.com/TehPeGaSuS/xmasbot v0.0.0-20251220223940-58c393450a4d
 	github.com/ugjka/go-tz/v2 v2.2.6
-	github.com/TehPeGaSuS/xmasbot v0.0.0-20240220183636-60f85109bc95
 )
 
 require (
@@ -17,7 +17,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ugjka/ircmsg v0.0.3 // indirect
 	github.com/ugjka/kittybot v0.0.66 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/term v0.28.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/term v0.38.0 // indirect
 	gopkg.in/inconshreveable/log15.v2 v2.16.0 // indirect
 )
