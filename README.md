@@ -10,10 +10,10 @@ Merry Christmas IRC party bot
 Posts Merry Christmas for each timezone when they happen
 ## Bot's commands
 
-- `!next` upcoming merry christmas
-- `!previous` previous merry christmas
+- `!next` upcoming Merry Christmas
+- `!previous` previous Merry Mhristmas
 - `!remaining` number of remaining timezones
-- `!xmas <location>` get merry christmas status for location
+- `!xmas <location>` get Merry Christmas status for location
 - `!time <location>` get the current time in a location
 - `!time` UTC
 - `!help` show help
