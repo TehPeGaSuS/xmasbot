@@ -5,7 +5,7 @@ go 1.24.0
 replace github.com/TehPeGaSuS/xmasbot => ../../
 
 require (
-	github.com/TehPeGaSuS/xmasbot v0.0.0-20251220223940-58c393450a4d
+	github.com/TehPeGaSuS/xmasbot v0.0.0-20251222162138-7de1206c89f6
 	github.com/ugjka/go-tz/v2 v2.2.6
 )
 
