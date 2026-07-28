@@ -7,12 +7,12 @@ import (
 	"log"
 	"sort"
 
-	"github.com/TehPeGaSuS/xmasbot/nyb"
+	"github.com/TehPeGaSuS/xmasbot/xmas"
 )
 
 func main() {
-	var zones nyb.TZS
-	err := json.Unmarshal(nyb.Zones, &zones)
+	var zones xmas.TZS
+	err := json.Unmarshal(xmas.Zones, &zones)
 	if err != nil {
 		log.Fatal(err)
 	}

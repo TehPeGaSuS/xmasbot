@@ -1,6 +1,5 @@
 # xmasbot
-Merry Christmas bot based on https://github.com/ugjka/newyearsbot
-----
+
 # XmasBot
 
 ## 2025 here we come
@@ -78,3 +77,6 @@ CMD Options:
 See example config: [settings.yaml](settings.yaml)
 
 Useful if you wanna run multiple bot instances across different IRC hosts
+
+----
+Merry Christmas bot inspired by https://github.com/ugjka/newyearsbot

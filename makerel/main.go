@@ -70,7 +70,8 @@ func main() {
 			build.Env = append(os.Environ(), "GOOS="+t.os, "GOARCH="+arch)
 			fmt.Println(t.os, arch)
 			if err := build.Run(); err != nil {
-				panic(err)
+				fmt.Fprintf(os.Stderr, "skipping %s/%s: %v\n", t.os, arch, err)
+				continue
 			}
 			zip := exec.Command("zip", "")
 			exe := "xmasbot"

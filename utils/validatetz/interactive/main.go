@@ -4,15 +4,20 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"time"
 
-	"github.com/ugjka/go-tz/v2"
-	"github.com/TehPeGaSuS/xmasbot/nyb"
+	"github.com/TehPeGaSuS/xmasbot/xmas"
+	"github.com/ringsaturn/tzf"
+	"github.com/ringsaturn/tzf/convert"
 )
+
+var tzFinder tzf.F
 
 var email *string
 var nominatim *string
@@ -41,7 +46,26 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		tz.LoadGeoJSON(f)
+		defer f.Close()
+		data, err := io.ReadAll(f)
+		if err != nil {
+			panic(err)
+		}
+		var boundary convert.BoundaryFile
+		if err := json.Unmarshal(data, &boundary); err != nil {
+			panic(err)
+		}
+		finder, err := tzf.NewFinderFromRawJSON(&boundary)
+		if err != nil {
+			panic(err)
+		}
+		tzFinder = finder
+	} else {
+		finder, err := tzf.NewDefaultFinder()
+		if err != nil {
+			panic(err)
+		}
+		tzFinder = finder
 	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -55,7 +79,7 @@ func main() {
 }
 
 func locationInfo(location string) (string, error) {
-	mapj, err := nyb.NominatimFetcher(*email, *nominatim, location)
+	mapj, err := xmas.NominatimFetcher(*email, *nominatim, location)
 	if err != nil {
 		return "", err
 	}
@@ -63,17 +87,13 @@ func locationInfo(location string) (string, error) {
 	if len(mapj) == 0 {
 		return "", errors.New("status not OK")
 	}
-	point := tz.Point{
-		Lat: mapj[0].Lat,
-		Lon: mapj[0].Lon,
-	}
 	now := time.Now()
-	tzid, err := tz.GetZone(point)
+	tzid := tzFinder.GetTimezoneName(mapj[0].Lon, mapj[0].Lat)
 	lookup := time.Now().Sub(now)
-	if err != nil {
-		return "", err
+	if tzid == "" {
+		return "", errors.New("no timezone found")
 	}
-	zone, err := time.LoadLocation(tzid[0])
+	zone, err := time.LoadLocation(tzid)
 	if err != nil {
 		return "", err
 	}

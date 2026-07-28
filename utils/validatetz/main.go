@@ -11,9 +11,19 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ugjka/go-tz/v2"
-	"github.com/TehPeGaSuS/xmasbot/nyb"
+	"github.com/TehPeGaSuS/xmasbot/xmas"
+	"github.com/ringsaturn/tzf"
 )
+
+var tzFinder tzf.F
+
+func init() {
+	f, err := tzf.NewDefaultFinder()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tzFinder = f
+}
 
 // Set target year
 var target = func() time.Time {
@@ -35,8 +45,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%s", "provide email with -email flag\n")
 		return
 	}
-	var zones nyb.TZS
-	if err := json.Unmarshal(nyb.Zones, &zones); err != nil {
+	var zones xmas.TZS
+	if err := json.Unmarshal(xmas.Zones, &zones); err != nil {
 		log.Fatal(err)
 	}
 	//print target to be sure
@@ -73,17 +83,17 @@ func main() {
 
 // Get Timezone Offset
 func timeZone(country, city string) (float64, error) {
-	var mapj nyb.NominatimResults
+	var mapj xmas.NominatimResults
 	var err error
 	if country == "CAR" || country == "Congo" {
-		mapj, err = nyb.NominatimFetcherLong(*email, *nominatim, country, "", "")
+		mapj, err = xmas.NominatimFetcherLong(*email, *nominatim, country, "", "")
 		if err != nil {
 			return 0, err
 		}
 	} else {
-		mapj, err = nyb.NominatimFetcher(*email, *nominatim, country+", "+city)
+		mapj, err = xmas.NominatimFetcher(*email, *nominatim, country+", "+city)
 		if mapj != nil && len(mapj) == 0 {
-			mapj, err = nyb.NominatimFetcher(*email, *nominatim, city+", "+country)
+			mapj, err = xmas.NominatimFetcher(*email, *nominatim, city+", "+country)
 		}
 		if err != nil {
 			return 0, err
@@ -93,15 +103,11 @@ func timeZone(country, city string) (float64, error) {
 		return 0, fmt.Errorf("no results")
 	}
 
-	point := tz.Point{
-		Lat: mapj[0].Lat,
-		Lon: mapj[0].Lon,
+	tzid := tzFinder.GetTimezoneName(mapj[0].Lon, mapj[0].Lat)
+	if tzid == "" {
+		return 0, fmt.Errorf("no timezone found")
 	}
-	tzid, err := tz.GetZone(point)
-	if err != nil {
-		return 0, err
-	}
-	zone, err := time.LoadLocation(tzid[0])
+	zone, err := time.LoadLocation(tzid)
 	if err != nil {
 		return 0, err
 	}

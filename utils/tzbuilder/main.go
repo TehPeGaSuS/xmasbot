@@ -12,9 +12,19 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/ugjka/go-tz/v2"
-	"github.com/TehPeGaSuS/xmasbot/nyb"
+	"github.com/TehPeGaSuS/xmasbot/xmas"
+	"github.com/ringsaturn/tzf"
 )
+
+var tzFinder tzf.F
+
+func init() {
+	f, err := tzf.NewDefaultFinder()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tzFinder = f
+}
 
 // scraping https://www.timeanddate.com/time/map/
 const DATASET_JSON_URL = "https://c.tadst.com/gfx/tzmap/worldclockcities.en.json"
@@ -44,7 +54,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var zones nyb.TZS
+	var zones xmas.TZS
 	for i, loc := range p.Places {
 		if loc.Country == "Western Sahara" {
 			continue
@@ -99,10 +109,10 @@ func postprocess() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fresh := nyb.TZS{}
+	fresh := xmas.TZS{}
 	json.Unmarshal(data, &fresh)
-	old := nyb.TZS{}
-	json.Unmarshal(nyb.Zones, &old)
+	old := xmas.TZS{}
+	json.Unmarshal(xmas.Zones, &old)
 	var diff int
 	for i, z := range fresh {
 		if old[i+diff].Offset != z.Offset {
@@ -152,7 +162,7 @@ func postprocess() {
 
 // END POST PROCESSING
 
-var template = `package nyb
+var template = `package xmas
 
 // Zones contains time zone information in JSON format
 var Zones = []byte(` + "`%s`)\n"
@@ -203,9 +213,9 @@ func fixes(s string) string {
 
 // Get Timezone Offset
 func timeZone(country, city string) (float64, error) {
-	mapj, err := nyb.NominatimFetcherLong(*email, *nominatim, country, city, "")
+	mapj, err := xmas.NominatimFetcherLong(*email, *nominatim, country, city, "")
 	if len(mapj) == 0 || err != nil {
-		mapj, err = nyb.NominatimFetcher(*email, *nominatim, country+", "+city)
+		mapj, err = xmas.NominatimFetcher(*email, *nominatim, country+", "+city)
 		if err != nil {
 			return 0, err
 		}
@@ -213,15 +223,11 @@ func timeZone(country, city string) (float64, error) {
 			return 0, fmt.Errorf("no results")
 		}
 	}
-	point := tz.Point{
-		Lat: mapj[0].Lat,
-		Lon: mapj[0].Lon,
+	tzid := tzFinder.GetTimezoneName(mapj[0].Lon, mapj[0].Lat)
+	if tzid == "" {
+		return 0, fmt.Errorf("no timezone found")
 	}
-	tzid, err := tz.GetZone(point)
-	if err != nil {
-		return 0, err
-	}
-	zone, err := time.LoadLocation(tzid[0])
+	zone, err := time.LoadLocation(tzid)
 	if err != nil {
 		return 0, err
 	}

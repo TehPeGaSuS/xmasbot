@@ -2,17 +2,14 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"fmt"
-	"net"
 	"os"
 	"regexp"
-	"time"
 
+	"github.com/TehPeGaSuS/xmasbot/xmas"
 	"github.com/badoux/checkmail"
 	"github.com/fatih/color"
-	"github.com/TehPeGaSuS/xmasbot/nyb"
 	log "gopkg.in/inconshreveable/log15.v2"
 	"gopkg.in/yaml.v3"
 )
@@ -49,7 +46,7 @@ const SET_LIBERA_SERVER = "irc.libera.chat:6697"
 const SET_PREFIX = "!"
 
 func main() {
-	var channels nyb.Channels
+	var channels xmas.Channels
 
 	// Mandatory
 	flag.Var(&channels, "channels", "comma separated list of channels")
@@ -131,110 +128,32 @@ func main() {
 		}
 		os.Exit(1)
 	}
-	var bots []*nyb.Settings
+	var bots []*xmas.Settings
 	for _, c := range c {
-		var err error
-		var customTLSDial nyb.TLSDialFunc
-		var customDial nyb.DialFunc
-		if c.NoSSL && c.Bind != "" {
-			customDial, err = func() (nyb.DialFunc, error) {
-				if c.Bind == "" {
-					return nil, nil
-				}
-				localAddr, err := net.ResolveIPAddr("ip", c.Bind)
-				if err != nil {
-					return nil, err
-				}
-
-				localTCPAddr := net.TCPAddr{
-					IP: localAddr.IP,
-				}
-				remoteAddr, err := net.ResolveTCPAddr("tcp", c.Server)
-				if err != nil {
-					return nil, err
-				}
-				dialer := func(network string, addr string) (net.Conn, error) {
-					return net.DialTCP(network, &localTCPAddr, remoteAddr)
-				}
-				return dialer, nil
-			}()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "BINDHOST:", err)
-				os.Exit(1)
-			}
-		}
-		if !c.NoSSL && c.Bind != "" {
-			customTLSDial, err = func() (nyb.TLSDialFunc, error) {
-				if c.Bind == "" {
-					return nil, nil
-				}
-
-				localAddr, err := net.ResolveIPAddr("ip", c.Bind)
-				if err != nil {
-					return nil, err
-				}
-
-				localTCPAddr := net.TCPAddr{
-					IP: localAddr.IP,
-				}
-
-				dialer := &net.Dialer{
-					LocalAddr: &localTCPAddr,
-					Timeout:   30 * time.Second,
-					KeepAlive: 30 * time.Second,
-				}
-
-				tlsSettings := &tls.Config{}
-				if c.NoCheck {
-					tlsSettings.InsecureSkipVerify = true
-				}
-
-				tlsdialer := func(network string, addr string, tlsConf *tls.Config) (*tls.Conn, error) {
-					return tls.DialWithDialer(dialer, network, addr, tlsSettings)
-				}
-				return tlsdialer, nil
-			}()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "BINDHOST:", err)
-				os.Exit(1)
-			}
-		}
-		if !c.NoSSL && c.NoCheck && c.Bind == "" {
-			customTLSDial = func() nyb.TLSDialFunc {
-
-				dialer := &net.Dialer{
-					Timeout:   30 * time.Second,
-					KeepAlive: 30 * time.Second,
-				}
-
-				skipverify := &tls.Config{InsecureSkipVerify: true}
-
-				tlsdialer := func(network string, addr string, tlsConf *tls.Config) (*tls.Conn, error) {
-					return tls.DialWithDialer(dialer, network, addr, skipverify)
-				}
-				return tlsdialer
-			}()
-		}
-		bots = append(bots,
-			nyb.New(
-				&nyb.Settings{
-					Nick:      c.Nick,
-					Channels:  c.Channels,
-					Server:    c.Server,
-					SSL:       !c.NoSSL,
-					Password:  c.Password,
-					SaslNick:  c.SaslNick,
-					SaslPass:  c.SaslPass,
-					Prefix:    c.Prefix,
-					Email:     c.Email,
-					Nominatim: c.Nominatim,
-					Limit:     !c.NoLimit,
-					Colors:    c.Colors,
-					Dial:      customDial,
-					TLSDial:   customTLSDial,
-				},
-			),
+		bot, err := xmas.New(
+			&xmas.Settings{
+				Nick:      c.Nick,
+				Channels:  c.Channels,
+				Server:    c.Server,
+				SSL:       !c.NoSSL,
+				NoCheck:   c.NoCheck,
+				Bind:      c.Bind,
+				Password:  c.Password,
+				SaslNick:  c.SaslNick,
+				SaslPass:  c.SaslPass,
+				Prefix:    c.Prefix,
+				Email:     c.Email,
+				Nominatim: c.Nominatim,
+				Limit:     !c.NoLimit,
+				Colors:    c.Colors,
+				Debug:     c.Debug,
+			},
 		)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "BINDHOST:", err)
+			os.Exit(1)
+		}
+		bots = append(bots, bot)
 	}
 
 	for i, bot := range bots {

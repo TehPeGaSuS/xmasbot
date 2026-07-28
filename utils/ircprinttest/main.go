@@ -5,40 +5,46 @@ import (
 	"log"
 	"time"
 
-	kitty "github.com/ugjka/kittybot"
-	"github.com/TehPeGaSuS/xmasbot/nyb"
-	"gopkg.in/inconshreveable/log15.v2"
+	"github.com/TehPeGaSuS/xmasbot/xmas"
+	"github.com/lrstanley/girc"
 )
 
 func main() {
-	bot := kitty.NewBot(
-		"testnet.ergo.chat:6697",
-		//"irc.libera.chat:6697",
-		"happyhappy2025v2",
-		func(b *kitty.Bot) {
-			b.Channels = []string{"##xmas00"}
-			b.SSL = true
-		},
-	)
-	var zones nyb.TZS
-	err := json.Unmarshal(nyb.Zones, &zones)
+	client := girc.New(girc.Config{
+		Server: "testnet.ergo.chat",
+		// Server: "irc.libera.chat",
+		Port: 6697,
+		Nick: "happyhappy2025v2",
+		User: "happyhappy2025v2",
+		Name: "happyhappy2025v2",
+		SSL:  true,
+		Out:  log.Writer(),
+	})
+
+	var zones xmas.TZS
+	err := json.Unmarshal(xmas.Zones, &zones)
 	if err != nil {
 		log.Fatal(err)
 	}
-	bot.AddTrigger(kitty.Trigger{
-		Condition: func(b *kitty.Bot, m *kitty.Message) bool {
-			return m.Content == "!test"
-		},
-		Action: func(b *kitty.Bot, m *kitty.Message) {
-			for _, z := range zones {
-				const pre = "\x02\x0302Next Merry Christmaas\x0f in \x02\x030213 seconds 323 milliseconds\x0f in "
-				b.Reply(m, pre+z.Format(b.MsgMaxSize(m.To)-len(pre), true))
-				time.Sleep(time.Second)
-				b.Reply(m, "**************************")
-				time.Sleep(time.Second * 3)
-			}
-		},
+
+	client.Handlers.Add(girc.CONNECTED, func(c *girc.Client, e girc.Event) {
+		c.Cmd.Join("##xmas00")
 	})
-	bot.Logger.SetHandler(log15.StdoutHandler)
-	bot.Run()
+
+	client.Handlers.Add(girc.PRIVMSG, func(c *girc.Client, e girc.Event) {
+		if e.Last() != "!test" {
+			return
+		}
+		for _, z := range zones {
+			const pre = "\x02\x0302Next Merry Christmaas\x0f in \x02\x030213 seconds 323 milliseconds\x0f in "
+			c.Cmd.ReplyTo(e, pre+z.Format(c.MaxEventLength()-len(pre), true))
+			time.Sleep(time.Second)
+			c.Cmd.ReplyTo(e, "**************************")
+			time.Sleep(time.Second * 3)
+		}
+	})
+
+	if err := client.Connect(); err != nil {
+		log.Fatal(err)
+	}
 }

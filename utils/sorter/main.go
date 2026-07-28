@@ -8,12 +8,12 @@ import (
 	"os"
 	"sort"
 
-	nyb "github.com/TehPeGaSuS/xmasbot/nyb"
+	"github.com/TehPeGaSuS/xmasbot/xmas"
 )
 
 func main() {
 	var v TZS
-	err := json.Unmarshal(nyb.Zones, &v)
+	err := json.Unmarshal(xmas.Zones, &v)
 	if err != nil {
 		panic(err)
 	}
